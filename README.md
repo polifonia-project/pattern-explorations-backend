@@ -1,5 +1,5 @@
 
-# Python Flask Server for Music Search API
+# Python Flask Server for Pattern Explorations using the Blazegraph KG
 
 A Python Flask server providing APIs for searching musical tunes and retrieving similarity measures. It can be connected to a SPARQL endpoint but currently uses a mock response.
 
