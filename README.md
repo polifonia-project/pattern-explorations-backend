@@ -1,3 +1,34 @@
+---
+component-id: pattern-explorations-backend
+type: Software
+name: Pattern Exploration Backend
+description: A server that requests and processes data from the [Patterns Knowledge Graph](https://github.com/polifonia-project/patterns-knowledge-graph) on behalf of the [Pattern Exploration GUI](https://github.com/polifonia-project/pattern-exploration-gui).
+work-package:
+- WP5
+project: polifonia-project
+resource: https://github.com/polifonia-project/pattern-explorations-backend/releases
+release-date: 01/03/2024
+release-number: v0.1.0
+licence:
+- GNU_GPL_v3
+contributors:
+- James McDermott <https://github.com/jmmcd>
+- Pushkar Jajoria <https://github.com/pushkarjajoria>
+- Rory Sweeney <https://github.com/rorys4>
+related-components:
+- reuses:
+  - "Pattern Exploration GUI https://github.com/polifonia-project/pattern-exploration-gui"
+  - "Patterns knowledge Graph https://github.com/polifonia-project/patterns-knowledge-graph"
+- informed-by:
+  - "Pattern GUI API Schema https://github.com/polifonia-project/Pattern-GUI-API-schema"
+links:
+- https://github.com/polifonia-project/pattern-explorations-backend
+funder:
+  - name: Horizon 2020 Framework Programme
+    url: https://cordis.europa.eu/programme/id/H2020-EC
+    grant-agreement: "https://cordis.europa.eu/project/id/101004746"
+credits: "This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement N. 101004746."
+---
 
 # Python Flask Server for Pattern Explorations using the Blazegraph KG
 
