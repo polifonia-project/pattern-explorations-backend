@@ -17,10 +17,10 @@ contributors:
 - Rory Sweeney <https://github.com/rorys4>
 related-components:
 - reuses:
-  - "Pattern Exploration GUI https://github.com/polifonia-project/pattern-exploration-gui"
-  - "Patterns knowledge Graph https://github.com/polifonia-project/patterns-knowledge-graph"
+  - "pattern-exploration-gui"
+  - "patterns-knowledge-graph"
 - informed-by:
-  - "Pattern GUI API Schema https://github.com/polifonia-project/Pattern-GUI-API-schema"
+  - "Pattern-GUI-API-schema"
 links:
 - https://github.com/polifonia-project/pattern-explorations-backend
 funder:
