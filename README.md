@@ -19,8 +19,6 @@ related-components:
 - reuses:
   - "pattern-exploration-gui"
   - "patterns-knowledge-graph"
-- informed-by:
-  - "Pattern-GUI-API-schema"
 links:
 - https://github.com/polifonia-project/pattern-explorations-backend
 funder:
