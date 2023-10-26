@@ -1,14 +1,45 @@
 from flask import Flask, request, jsonify
 import requests
 from flask_cors import CORS
-from query_factory import get_tune_given_name
+from query_factory import (get_tune_given_name, get_all_tune_names,
+                           get_tune_given_name2, get_pattern_search_query,
+                           advanced_search)
 
 app = Flask(__name__)
 CORS(app)
 
-BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
-MOCK = True
+MOCK = False
+LOCALSERVER = False
 
+if LOCALSERVER:
+    BLAZEGRAPH_URL = 'http://localhost:9999/bigdata/sparql'
+    #BLAZEGRAPH_URL = 'http://localhost:9999/blazegraph/sparql'
+else:
+    BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
+
+all_names = None
+
+
+# Return a list of all tune names
+def dl_tune_names():
+    global all_names
+    # Generate the SPARQL query
+    sparql_query = get_all_tune_names()
+    # Execute the SPARQL query
+    response = requests.post(
+        BLAZEGRAPH_URL,
+        data={
+            'query': sparql_query,
+            'format': 'json'
+        }
+    )
+    # Check the response status
+    if response.status_code != 200:
+        print('Failed to execute SPARQL query')
+        #TODO: Correctly handle this error.
+    else:
+        namesJSON = response.json()
+        all_names = [item['tune_name']['value'] for item in namesJSON['results']['bindings']]
 
 def mock_data(query_params):
     # Mock data
@@ -60,21 +91,28 @@ def mock_data(query_params):
         ],
         "query_params": query_params
     }
-
     return jsonify(data), 200
 
 
 @app.route('/api/search', methods=['GET'])
 def search():
+    global all_names
     # Get the query parameters from the GET request
     query_params = request.args.to_dict()
-
     if MOCK:
         return mock_data(query_params)
-
-    # Generate the SPARQL query
-    sparql_query = get_tune_given_name(query_params['query'])
-
+    if(query_params['searchType'] == "metadata"):
+        # Generate the SPARQL query
+        sparql_query = get_tune_given_name(query_params['query'], all_names)
+    elif(query_params['searchType'] == "pattern"):
+        sparql_query = get_pattern_search_query(query_params['query'])
+        #print(sparql_query)
+    elif(query_params['searchType'] == "advanced"):
+        print(query_params)
+        sparql_query = advanced_search(query_params, all_names)
+    else:
+        # Generate the SPARQL query
+        sparql_query = get_tune_given_name2(query_params['query'])
     # Execute the SPARQL query
     response = requests.post(
         BLAZEGRAPH_URL,
@@ -83,11 +121,11 @@ def search():
             'format': 'json'
         }
     )
-
+    #print(sparql_query)
+    #print(response.text)
     # Check the response status
     if response.status_code != 200:
         return jsonify({'error': 'Failed to execute SPARQL query'}), 500
-
     # Return the JSON data
     return jsonify(response.json()), 200
 
@@ -97,6 +135,8 @@ def similarity_measures_api():
     # Return a list of similarity measures
     return jsonify(["Measure 1", "Measure 2", "Measure 3"]), 200
 
+
+app.setup = [(None, dl_tune_names())]
 
 if __name__ == "__main__":
     app.run(debug=True)
