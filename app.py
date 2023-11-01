@@ -41,6 +41,7 @@ def dl_tune_names():
         namesJSON = response.json()
         all_names = [item['tune_name']['value'] for item in namesJSON['results']['bindings']]
 
+
 def mock_data(query_params):
     # Mock data
     data = {

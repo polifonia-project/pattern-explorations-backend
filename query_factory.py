@@ -2,11 +2,13 @@ import requests
 from fuzzywuzzy import process
 
 BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
-#BLAZEGRAPH_URL = 'https://localhost:9999/bigdata/sparql'
+
+
+# BLAZEGRAPH_URL = 'https://localhost:9999/bigdata/sparql'
 
 
 def get_pattern_search_query(pattern):
-    sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+    sparql_query = """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm:<http://w3id.org/polifonia/ontology/music-meta/>
                         PREFIX ptn:<http://w3id.org/polifonia/resource/pattern/>
                         SELECT distinct ?tune_name ?tuneType ?key ?signature
@@ -24,7 +26,7 @@ def get_pattern_search_query(pattern):
 
 
 def get_most_common_patterns_for_a_tune(tune):
-    sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+    sparql_query = """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm: <http://w3id.org/polifonia/ontology/music-meta/>
                         SELECT ?tune_name ?pattern (count(?pattern) as ?patternFreq)
                         {
@@ -43,7 +45,7 @@ def get_tune_given_name(query_name, all_names):
     matched_tuples = process.extractBests(query_name, all_names, score_cutoff=60, limit=100)
     print(matched_tuples)
     matched_names = [x[0] for x in matched_tuples]
-    sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+    sparql_query = """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm: <http://w3id.org/polifonia/ontology/music-meta/>
                         SELECT DISTINCT ?tune_name ?tuneType ?key ?signature
                         {
@@ -59,7 +61,7 @@ def get_tune_given_name(query_name, all_names):
 
 # Old version
 def get_tune_given_name2(name):
-    sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+    sparql_query = """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm: <http://w3id.org/polifonia/ontology/music-meta/>
                         SELECT DISTINCT ?tune_name ?tuneType ?key ?signature
                         {
@@ -77,13 +79,13 @@ def get_tune_given_name2(name):
 def advanced_search(query_params, all_names):
     if query_params['composition']:
         matched_tuples = process.extractBests(query_params['composition'], all_names, score_cutoff=60, limit=100)
-        #print(matched_tuples)
+        # print(matched_tuples)
         matched_names = [x[0] for x in matched_tuples]
         title_query = True
     else:
         title_query = False
 
-    sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+    sparql_query = """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm:<http://w3id.org/polifonia/ontology/music-meta/>
                         PREFIX ptn:<http://w3id.org/polifonia/resource/pattern/>
                         SELECT distinct ?tune_name ?tuneType ?key ?signature
@@ -97,7 +99,7 @@ def advanced_search(query_params, all_names):
                             OPTIONAL {?tune jams:key ?key}
                             OPTIONAL {?tune jams:timeSignature ?signature}"""
     if title_query:
-        sparql_query +=  """FILTER (?tune_name = \""""
+        sparql_query += """FILTER (?tune_name = \""""
         sparql_query += "\" || ?tune_name = \"".join(matched_names)
         sparql_query += "\").}"
     else:
@@ -106,7 +108,7 @@ def advanced_search(query_params, all_names):
 
 
 def get_all_tune_names():
-    sparql_query =   """PREFIX mm: <http://w3id.org/polifonia/ontology/music-meta/>
+    sparql_query = """PREFIX mm: <http://w3id.org/polifonia/ontology/music-meta/>
                         SELECT DISTINCT ?tune_name
                         {
                             ?tune_file mm:title ?tune_name.
