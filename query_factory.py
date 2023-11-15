@@ -2,11 +2,13 @@ import requests
 from fuzzywuzzy import process
 
 BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
-#BLAZEGRAPH_URL = 'https://localhost:9999/bigdata/sparql'
+
+
+# BLAZEGRAPH_URL = 'https://localhost:9999/bigdata/sparql'
 
 
 def get_pattern_search_query(pattern):
-    sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+    sparql_query = """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm:<http://w3id.org/polifonia/ontology/music-meta/>
                         PREFIX ptn:<http://w3id.org/polifonia/resource/pattern/>
                         SELECT distinct ?tune_name ?tuneType ?key ?signature ?id
@@ -47,11 +49,8 @@ def get_most_common_patterns_for_a_tune(id, excludeTrivialPatterns):
 def get_tune_given_name(query_name, all_names):
     names_dict = {i: val for i, val in enumerate(all_names[0])}
     matched_tuples = process.extractBests(query_name, names_dict, score_cutoff=60)
-    #print(matched_tuples)
     matched_name_indices = [x[2] for x in matched_tuples]
-    #print(matched_name_indices)
     matched_ids = [all_names[1][i] for i in matched_name_indices]
-    #print(matched_ids)
     sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm: <http://w3id.org/polifonia/ontology/music-meta/>
                         SELECT DISTINCT ?tune_name ?tuneType ?key ?signature ?id
@@ -64,7 +63,6 @@ def get_tune_given_name(query_name, all_names):
                             VALUES (?id) { ( \""""
     sparql_query += "\" ) ( \"".join(matched_ids)
     sparql_query += "\" ) }\n}"
-    #print(sparql_query)
     return sparql_query
 
 
@@ -80,7 +78,7 @@ def advanced_search(query_params, all_names):
     else:
         title_query = False
 
-    sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+    sparql_query = """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm:<http://w3id.org/polifonia/ontology/music-meta/>
                         PREFIX ptn:<http://w3id.org/polifonia/resource/pattern/>
                         PREFIX ttype:<http://w3id.org/polifonia/resource/tunetype>
