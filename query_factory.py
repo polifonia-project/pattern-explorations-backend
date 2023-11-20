@@ -22,7 +22,7 @@ def get_pattern_search_query(pattern):
                             OPTIONAL {?musicalComposition jams:tuneType ?tuneType}
                             OPTIONAL {?musicalComposition jams:key ?key}
                             OPTIONAL {?musicalComposition jams:timeSignature ?signature}
-                        }"""
+                        } ORDER BY ?tune_name"""
     return sparql_query
 
 
@@ -165,13 +165,14 @@ def get_neighbour_tunes_by_pattern(pattern):
     sparql_query =       """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                             PREFIX mm:<http://w3id.org/polifonia/ontology/music-meta/>
                             PREFIX ptn:<http://w3id.org/polifonia/resource/pattern/>
-                            SELECT distinct ?title ?id
+                            SELECT distinct ?title ?id ?family
                             WHERE
                             {
                                 ?obs jams:ofPattern ptn:""" + pattern + """.
                                 ?annotation jams:includesObservation ?obs.
                                 ?annotation jams:isJAMSAnnotationOf ?musicalComposition.
                                 ?musicalComposition jams:tuneId ?id.
+                                ?musicalComposition jams:tuneFamily ?family.
                                 OPTIONAL {?musicalComposition mm:title ?title}
                             } LIMIT 5"""
     return sparql_query

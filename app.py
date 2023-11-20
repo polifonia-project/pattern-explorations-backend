@@ -267,7 +267,33 @@ def getTuneFamilyMembers():
     return jsonify(response.json()), 200
 
 
+@app.route('/api/tunes_by_pattern', methods=['GET'])
+def getTunesContainingPattern():
+    # Get the query parameters from the GET request
+    query_params = request.args.to_dict()
+    # Generate the SPARQL query
+    #print(query_params)
+    sparql_query = get_pattern_search_query(query_params['pattern'])
+    # Execute the SPARQL query
+    response = requests.post(
+        BLAZEGRAPH_URL,
+        data={
+            'query': sparql_query,
+            'format': 'json'
+        }
+    )
+    #print(sparql_query)
+    #print(response.text)
+    # Check the response status
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to execute SPARQL query'}), 500
+    # Return the JSON data
+    return jsonify(response.json()), 200
+
 app.setup = [(None, dl_tune_names())]
 
 if __name__ == "__main__":
     app.run(debug=True)
+    #app.run(host='192.168.0.94')
+    #app.run(host='140.203.230.63')
+    #app.run(host='10.226.144.193')
