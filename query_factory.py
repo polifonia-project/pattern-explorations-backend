@@ -1,5 +1,6 @@
 import requests
 from fuzzywuzzy import process
+import sys
 
 BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
 
@@ -48,7 +49,7 @@ def get_most_common_patterns_for_a_tune(id, excludeTrivialPatterns):
 # Fuzzy Search
 def get_tune_given_name(query_name, all_names):
     names_dict = {i: val for i, val in enumerate(all_names[0])}
-    matched_tuples = process.extractBests(query_name, names_dict, score_cutoff=60)
+    matched_tuples = process.extractBests(query_name, names_dict, score_cutoff=60, limit = sys.maxsize)
     matched_name_indices = [x[2] for x in matched_tuples]
     matched_ids = [all_names[1][i] for i in matched_name_indices]
     sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
