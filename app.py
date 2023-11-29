@@ -2,46 +2,19 @@ from flask import Flask, request, jsonify
 import requests
 from fuzzywuzzy import process
 from flask_cors import CORS
-from query_factory import (get_tune_given_name, get_all_tune_names,
-                           get_pattern_search_query,
+from query_factory import (get_tune_given_name, get_pattern_search_query,
                            advanced_search, get_most_common_patterns_for_a_tune,
                            get_neighbour_patterns_by_tune, get_neighbour_tunes_by_pattern,
                            get_tune_data, get_tune_family_members)
+import fuzzy_search
 
 app = Flask(__name__)
 CORS(app)
 
 MOCK = False
-LOCALSERVER = False
+BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
 
-if LOCALSERVER:
-    BLAZEGRAPH_URL = 'http://localhost:9999/bigdata/sparql'
-else:
-    BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
-
-all_names = None
-
-
-# Return a list of all tune names
-def dl_tune_names():
-    global all_names
-    # Generate the SPARQL query
-    sparql_query = get_all_tune_names()
-    # Execute the SPARQL query
-    response = requests.post(
-        BLAZEGRAPH_URL,
-        data={
-            'query': sparql_query,
-            'format': 'json'
-        }
-    )
-    # Check the response status
-    if response.status_code != 200:
-        print('Failed to execute SPARQL query')
-        #TODO: Correctly handle this error.
-    else:
-        namesJSON = response.json()
-        all_names = {item['id']['value']: item['title']['value'] for item in namesJSON['results']['bindings']}
+all_names = fuzzy_search.fuzzySearch()
 
 
 def mock_data(query_params):
@@ -105,7 +78,7 @@ def search():
     if MOCK:
         return mock_data(query_params)
     if query_params['searchType'] == "title":
-        matched_tuples = process.extractBests(query_params['searchTerm'], all_names,
+        matched_tuples = process.extractBests(query_params['searchTerm'], all_names.names,
                                               score_cutoff=60,
                                               limit=200)
         if not matched_tuples:
@@ -119,7 +92,7 @@ def search():
     elif query_params['searchType'] == "advanced":
         matched_tuples = []
         if query_params['title']:
-            matched_tuples = process.extractBests(query_params['title'], all_names,
+            matched_tuples = process.extractBests(query_params['title'], all_names.names,
                                                   score_cutoff=60,
                                                   limit=200)
         if query_params['title'] and not matched_tuples:
@@ -296,7 +269,6 @@ def getTunesContainingPattern():
     # Return the JSON data
     return jsonify(response.json()), 200
 
-app.setup = [(None, dl_tune_names())]
 
 if __name__ == "__main__":
     app.run(debug=True)
