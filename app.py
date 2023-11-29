@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import requests
+from fuzzywuzzy import process
 from flask_cors import CORS
 from query_factory import (get_tune_given_name, get_all_tune_names,
                            get_pattern_search_query,
@@ -15,7 +16,6 @@ LOCALSERVER = False
 
 if LOCALSERVER:
     BLAZEGRAPH_URL = 'http://localhost:9999/bigdata/sparql'
-    #BLAZEGRAPH_URL = 'http://localhost:9999/blazegraph/sparql'
 else:
     BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
 
@@ -35,19 +35,13 @@ def dl_tune_names():
             'format': 'json'
         }
     )
-    #print(sparql_query)
-    #print(response.text)
     # Check the response status
     if response.status_code != 200:
         print('Failed to execute SPARQL query')
         #TODO: Correctly handle this error.
     else:
         namesJSON = response.json()
-        #all_names = [item['title']['value'] for item in namesJSON['results']['bindings']]
-        all_names = [[item[var]['value'] for item in namesJSON['results']['bindings']] for var in ['title', 'id']]
-        #print(all_names)
-        #print(all_names[0][200])
-        #print(all_names[1][200])
+        all_names = {item['id']['value']: item['title']['value'] for item in namesJSON['results']['bindings']}
 
 
 def mock_data(query_params):
@@ -110,15 +104,29 @@ def search():
     query_params = request.args.to_dict()
     if MOCK:
         return mock_data(query_params)
-    if(query_params['searchType'] == "title"):
-        # Generate the SPARQL query
-        sparql_query = get_tune_given_name(query_params['searchTerm'], all_names)
-    elif(query_params['searchType'] == "pattern"):
+    if query_params['searchType'] == "title":
+        matched_tuples = process.extractBests(query_params['searchTerm'], all_names,
+                                              score_cutoff=60,
+                                              limit=200)
+        if not matched_tuples:
+            # If there are no matched titles, return an empty response.
+            return jsonify({"head":{"vars":["tune_name", "tuneType", "key", "signature", "id"]},"results":{"bindings":[]}}), 200
+        else:
+            # Generate the SPARQL query
+            sparql_query = get_tune_given_name(matched_tuples)
+    elif query_params['searchType'] == "pattern":
         sparql_query = get_pattern_search_query(query_params['searchTerm'])
-        #print(sparql_query)
-    elif(query_params['searchType'] == "advanced"):
-        #print(query_params)
-        sparql_query = advanced_search(query_params, all_names)
+    elif query_params['searchType'] == "advanced":
+        matched_tuples = []
+        if query_params['title']:
+            matched_tuples = process.extractBests(query_params['title'], all_names,
+                                                  score_cutoff=60,
+                                                  limit=200)
+        if query_params['title'] and not matched_tuples:
+            # If a title is searched for and there are no matched titles, return an empty response.
+            return jsonify({"head":{"vars":["tune_name", "tuneType", "key", "signature", "id"]},"results":{"bindings":[]}}), 200
+        else:
+            sparql_query = advanced_search(query_params, matched_tuples)
     else:
         # Error message.
         return jsonify({'error': 'Invalid search type.'}), 501
@@ -130,8 +138,6 @@ def search():
             'format': 'json'
         }
     )
-    #print(sparql_query)
-    #print(response.text)
     # Check the response status
     if response.status_code != 200:
         return jsonify({'error': 'Failed to execute SPARQL query'}), 500
@@ -295,5 +301,4 @@ app.setup = [(None, dl_tune_names())]
 if __name__ == "__main__":
     app.run(debug=True)
     #app.run(host='192.168.0.94')
-    #app.run(host='140.203.230.63')
     #app.run(host='10.226.144.193')

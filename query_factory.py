@@ -1,11 +1,6 @@
 import requests
-from fuzzywuzzy import process
-import sys
 
 BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
-
-
-# BLAZEGRAPH_URL = 'https://localhost:9999/bigdata/sparql'
 
 
 def get_pattern_search_query(pattern):
@@ -42,16 +37,11 @@ def get_most_common_patterns_for_a_tune(id, excludeTrivialPatterns):
                         """
     sparql_query +=     """?observation jams:ofPattern ?pattern .
                         } group by ?pattern
-                        order by DESC (?patternFreq ) LIMIT 10"""
+                        order by DESC (?patternFreq) LIMIT 10"""
     return sparql_query
 
 
-# Fuzzy Search
-def get_tune_given_name(query_name, all_names):
-    names_dict = {i: val for i, val in enumerate(all_names[0])}
-    matched_tuples = process.extractBests(query_name, names_dict, score_cutoff=60, limit = sys.maxsize)
-    matched_name_indices = [x[2] for x in matched_tuples]
-    matched_ids = [all_names[1][i] for i in matched_name_indices]
+def get_tune_given_name(matched_ids):
     sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm: <http://w3id.org/polifonia/ontology/music-meta/>
                         SELECT DISTINCT ?tune_name ?tuneType ?key ?signature ?id
@@ -61,24 +51,14 @@ def get_tune_given_name(query_name, all_names):
                             OPTIONAL {?tune jams:tuneType ?tuneType}
                             OPTIONAL {?tune jams:key ?key}
                             OPTIONAL {?tune jams:timeSignature ?signature}
-                            VALUES (?id) { ( \""""
-    sparql_query += "\" ) ( \"".join(matched_ids)
-    sparql_query += "\" ) }\n}"
+                            VALUES (?title ?match_strength ?id) { ( \""""
+    sparql_query += "\" ) ( \"".join(['\" \"'.join(map(str,tup)) for tup in matched_ids])
+    sparql_query += "\" ) }\n} ORDER BY DESC(xsd:integer(?match_strength)) ?title"
     return sparql_query
 
 
 # Advanced search
-def advanced_search(query_params, all_names):
-    if query_params['title']:
-        names_dict = {i: val for i, val in enumerate(all_names[0])}
-        matched_tuples = process.extractBests(query_params['title'], names_dict,
-                                              score_cutoff=60)
-        matched_name_indices = [x[2] for x in matched_tuples]
-        matched_ids = [all_names[1][i] for i in matched_name_indices]
-        title_query = True
-    else:
-        title_query = False
-
+def advanced_search(query_params, matched_ids):
     sparql_query = """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm:<http://w3id.org/polifonia/ontology/music-meta/>
                         PREFIX ptn:<http://w3id.org/polifonia/resource/pattern/>
@@ -118,15 +98,17 @@ def advanced_search(query_params, all_names):
     else:
         sparql_query += "   OPTIONAL {?tune jams:timeSignature ?signature}\n"
 
-    if title_query:
+    if query_params['title']:
         sparql_query +=  """?tune mm:title ?tune_name .
-                            VALUES (?id) { ( \""""
-        sparql_query += "\" ) ( \"".join(matched_ids)
+                            VALUES(?title ?match_strength ?id) {( \""""
+        sparql_query += "\" ) ( \"".join(['\" \"'.join(map(str,tup)) for tup in matched_ids])
         sparql_query += "\" ) }\n"
     else:
         sparql_query += "   OPTIONAL {?tune mm:title ?tune_name}\n"
 
     sparql_query +=     "?tune jams:tuneId ?id.}"
+    if query_params['title']:
+        sparql_query += " ORDER BY DESC(xsd:integer(?match_strength)) ?title"
     return sparql_query
 
 
