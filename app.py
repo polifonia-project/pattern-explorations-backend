@@ -38,14 +38,15 @@ def search():
         sparql_query = get_pattern_search_query(search_term)
     # Advanced search
     elif search_type == "advanced":
+        matched_tuples = []
         if query_params['title']:
             search_term = query_params['title']
             matched_tuples = fuzzy_search.get_title_best_match(search_term)
-            if not matched_tuples:
-                # If a title is searched for and there are no matched titles, return an empty response.
-                return jsonify(EMPTY_SEARCH_RESPONSE), 200
-            else:
-                sparql_query = advanced_search(query_params, matched_tuples)
+        if query_params['title'] and not matched_tuples:
+            # If a title is searched for and there are no matched titles, return an empty response.
+            return jsonify(EMPTY_SEARCH_RESPONSE), 200
+        else:
+            sparql_query = advanced_search(query_params, matched_tuples)
     else:
         # Error message.
         return jsonify({'error': 'Invalid search type.'}), 501
