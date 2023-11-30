@@ -59,6 +59,8 @@ def search():
     )
     # Check the response status
     if response.status_code != 200:
+        print(f"Error executing Sparql Query = {sparql_query}")
+        print(response.json())
         return jsonify({'error': 'Failed to execute SPARQL query'}), 500
     # Return the JSON data
     return jsonify(response.json()), 200
