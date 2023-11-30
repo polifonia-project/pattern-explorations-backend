@@ -109,6 +109,8 @@ def advanced_search(query_params, matched_ids):
     sparql_query +=     "?tune jams:tuneId ?id.}"
     if query_params['title']:
         sparql_query += " ORDER BY DESC(xsd:integer(?match_strength)) ?title"
+    else:
+        sparql_query += " ORDER BY ?tune_name"
     return sparql_query
 
 
