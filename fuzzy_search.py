@@ -26,12 +26,14 @@ class FuzzySearch:
         namesJSON = response.json()
         self.names = {item['id']['value']: item['title']['value'] for item in namesJSON['results']['bindings']}
 
-    def get_title_best_match(self, title, score_cutoff=60, limit=50, retry_till_match=True):
+    def get_title_best_match(self, title, score_cutoff=60, limit=50, retry_till_match=True, max_retries=3):
         best_matches = fuzzy_process.extractBests(title, self.names,
                                                   score_cutoff=score_cutoff,
                                                   limit=limit)
         if not best_matches and retry_till_match:
-            while not best_matches:
+            retry_count = 0
+            while not best_matches and retry_count < max_retries:
+                retry_count += 1
                 score_cutoff /= 2
                 best_matches = fuzzy_process.extractBests(title, self.names,
                                                           score_cutoff=score_cutoff,
