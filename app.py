@@ -1,105 +1,51 @@
 from flask import Flask, request, jsonify
 import requests
-from fuzzywuzzy import process
 from flask_cors import CORS
 from query_factory import (get_tune_given_name, get_pattern_search_query,
                            advanced_search, get_most_common_patterns_for_a_tune,
                            get_neighbour_patterns_by_tune, get_neighbour_tunes_by_pattern,
                            get_tune_data, get_tune_family_members)
-import fuzzy_search
+
+from fuzzy_search import FuzzySearch
 
 app = Flask(__name__)
 CORS(app)
 
-MOCK = False
 BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
-
-all_names = fuzzy_search.fuzzySearch()
-
-
-def mock_data(query_params):
-    # Mock data
-    data = {
-        "tunes": [
-            {
-                "id": "1",
-                "name": "Spring",
-                "year": 1723,
-                "composer": "Antonio Vivaldi",
-                "midiUrl": "http://example.com/vivaldi/spring.mid",
-                "notationUrl": "http://example.com/vivaldi/spring.pdf",
-                "otherInfo": {
-                    "part": "Allegro",
-                    "composition": "The Four Seasons"
-                }
-            },
-            {
-                "id": "2",
-                "name": "Summer",
-                "year": 1723,
-                "composer": "Antonio Vivaldi",
-                "midiUrl": "http://example.com/vivaldi/summer.mid",
-                "notationUrl": "http://example.com/vivaldi/summer.pdf",
-                "otherInfo": {
-                    "part": "Presto",
-                    "composition": "The Four Seasons"
-                }
-            },
-            {
-                "id": "3",
-                "name": "Canon in D",
-                "year": 1680,
-                "composer": "",
-                "midiUrl": "http://example.com/pachelbel/canon.mid",
-                "notationUrl": "http://example.com/pachelbel/canon.pdf",
-                "otherInfo": {}
-            },
-            {
-                "id": "4",
-                "name": "Toccata and Fugue in D minor",
-                "year": "",
-                "composer": "Johann Sebastian Bach",
-                "midiUrl": "http://example.com/bach/toccata.mid",
-                "notationUrl": "http://example.com/bach/toccata.pdf",
-                "otherInfo": {}
-            }
-            # More mock data can be added here
-        ],
-        "query_params": query_params
-    }
-    return jsonify(data), 200
+EMPTY_SEARCH_RESPONSE = {"head":{"vars":["tune_name", "tuneType", "key", "signature", "id"]},"results":{"bindings":[]}}
+fuzzy_search = FuzzySearch(BLAZEGRAPH_URL)
 
 
 @app.route('/api/search', methods=['GET'])
 def search():
-    global all_names
     # Get the query parameters from the GET request
     query_params = request.args.to_dict()
-    if MOCK:
-        return mock_data(query_params)
-    if query_params['searchType'] == "title":
-        matched_tuples = process.extractBests(query_params['searchTerm'], all_names.names,
-                                              score_cutoff=60,
-                                              limit=200)
-        if not matched_tuples:
+    # Compostion Title based search
+    search_type = query_params['searchType']
+    sparql_query = ""
+    if search_type == "title":
+        search_term = query_params['searchTerm']
+        fuzzy_title_matches = fuzzy_search.get_title_best_match(search_term)
+        if not fuzzy_title_matches:
             # If there are no matched titles, return an empty response.
-            return jsonify({"head":{"vars":["tune_name", "tuneType", "key", "signature", "id"]},"results":{"bindings":[]}}), 200
+            return jsonify(EMPTY_SEARCH_RESPONSE), 200
         else:
             # Generate the SPARQL query
-            sparql_query = get_tune_given_name(matched_tuples)
-    elif query_params['searchType'] == "pattern":
-        sparql_query = get_pattern_search_query(query_params['searchTerm'])
-    elif query_params['searchType'] == "advanced":
-        matched_tuples = []
+            sparql_query = get_tune_given_name(fuzzy_title_matches)
+    # Patters based search
+    elif search_type == "pattern":
+        search_term = query_params['searchTerm']
+        sparql_query = get_pattern_search_query(search_term)
+    # Advanced search
+    elif search_type == "advanced":
         if query_params['title']:
-            matched_tuples = process.extractBests(query_params['title'], all_names.names,
-                                                  score_cutoff=60,
-                                                  limit=200)
-        if query_params['title'] and not matched_tuples:
-            # If a title is searched for and there are no matched titles, return an empty response.
-            return jsonify({"head":{"vars":["tune_name", "tuneType", "key", "signature", "id"]},"results":{"bindings":[]}}), 200
-        else:
-            sparql_query = advanced_search(query_params, matched_tuples)
+            search_term = query_params['title']
+            matched_tuples = fuzzy_search.get_title_best_match(search_term)
+            if not matched_tuples:
+                # If a title is searched for and there are no matched titles, return an empty response.
+                return jsonify(EMPTY_SEARCH_RESPONSE), 200
+            else:
+                sparql_query = advanced_search(query_params, matched_tuples)
     else:
         # Error message.
         return jsonify({'error': 'Invalid search type.'}), 501
@@ -129,7 +75,6 @@ def getPatterns():
     # Get the query parameters from the GET request
     query_params = request.args.to_dict()
     # Generate the SPARQL query
-    #print(query_params)
     sparql_query = get_most_common_patterns_for_a_tune(query_params['id'],
                                                        query_params['excludeTrivialPatterns'])
     # Execute the SPARQL query
@@ -140,8 +85,6 @@ def getPatterns():
             'format': 'json'
         }
     )
-    #print(sparql_query)
-    #print(response.text)
     # Check the response status
     if response.status_code != 200:
         return jsonify({'error': 'Failed to execute SPARQL query'}), 500
