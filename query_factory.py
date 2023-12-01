@@ -41,6 +41,24 @@ def get_most_common_patterns_for_a_tune(id, excludeTrivialPatterns):
     return sparql_query
 
 
+def get_patterns_in_common_between_two_tunes(id, prev):
+    sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+                        PREFIX mm: <http://w3id.org/polifonia/ontology/music-meta/>
+                        SELECT ?pattern
+                        {
+                            ?tune1 jams:tuneId \"""" + id + """\".
+                            ?xx1 jams:isJAMSAnnotationOf ?tune1.
+                            ?xx1 jams:includesObservation ?observation1 .
+                            ?observation1 jams:ofPattern ?pattern .
+                            ?tune2 jams:tuneId \"""" + prev + """\".
+                            ?xx2 jams:isJAMSAnnotationOf ?tune2.
+                            ?xx2 jams:includesObservation ?observation2 .
+                            ?observation2 jams:ofPattern ?pattern .
+                        } group by ?pattern
+                        order by DESC (count(?pattern)) ?pattern LIMIT 10"""
+    return sparql_query
+
+
 def get_tune_given_name(matched_ids):
     sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm: <http://w3id.org/polifonia/ontology/music-meta/>

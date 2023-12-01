@@ -4,7 +4,8 @@ from flask_cors import CORS
 from query_factory import (get_tune_given_name, get_pattern_search_query,
                            advanced_search, get_most_common_patterns_for_a_tune,
                            get_neighbour_patterns_by_tune, get_neighbour_tunes_by_pattern,
-                           get_tune_data, get_tune_family_members)
+                           get_tune_data, get_tune_family_members,
+                           get_patterns_in_common_between_two_tunes)
 
 from fuzzy_search import FuzzySearch
 
@@ -80,6 +81,28 @@ def getPatterns():
     # Generate the SPARQL query
     sparql_query = get_most_common_patterns_for_a_tune(query_params['id'],
                                                        query_params['excludeTrivialPatterns'])
+    # Execute the SPARQL query
+    response = requests.post(
+        BLAZEGRAPH_URL,
+        data={
+            'query': sparql_query,
+            'format': 'json'
+        }
+    )
+    # Check the response status
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to execute SPARQL query'}), 500
+    # Return the JSON data
+    return jsonify(response.json()), 200
+
+
+@app.route('/api/common_patterns', methods=['GET'])
+def getCommonPatterns():
+    # Get the query parameters from the GET request
+    query_params = request.args.to_dict()
+    # Generate the SPARQL query
+    sparql_query = get_patterns_in_common_between_two_tunes(query_params['id'],
+                                                            query_params['prev'])
     # Execute the SPARQL query
     response = requests.post(
         BLAZEGRAPH_URL,
