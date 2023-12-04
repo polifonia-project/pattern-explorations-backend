@@ -1,7 +1,6 @@
 import requests
 
-BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
-
+NUM_NODES = 5
 
 def get_pattern_search_query(pattern):
     sparql_query = """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
@@ -145,7 +144,8 @@ def get_all_tune_names():
 
 
 # Get the pattern node data for the network visualisation.
-def get_neighbour_patterns_by_tune(id, excludeTrivialPatterns):
+def get_neighbour_patterns_by_tune(id, click_num, excludeTrivialPatterns):
+    offset = NUM_NODES*int(click_num)
     sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm: <http://w3id.org/polifonia/ontology/music-meta/>
                         SELECT ?pattern (count(?pattern) as ?patternFreq)
@@ -153,18 +153,20 @@ def get_neighbour_patterns_by_tune(id, excludeTrivialPatterns):
                             ?tune jams:tuneId \"""" + id + """\".
                             ?xx jams:isJAMSAnnotationOf ?tune.
                             ?xx jams:includesObservation ?observation .
+                            ?observation jams:hasPatternComplexity ?comp .
                         """
     if excludeTrivialPatterns == "true":
-        sparql_query += """ ?observation jams:hasPatternComplexity ?comp .
-                            FILTER (?comp > "0.4"^^xsd:float) .
+        sparql_query += """ FILTER (?comp > "0.4"^^xsd:float) .
                         """
     sparql_query +=     """?observation jams:ofPattern ?pattern .
-                        } group by ?pattern order by DESC (?patternFreq) LIMIT 5"""
+                        } group by ?pattern order by DESC (?patternFreq) ?comp
+                        OFFSET """ + str(offset) + " LIMIT " + str(NUM_NODES)
     return sparql_query
 
 
 # Get the tune node data for the network visualisation.
-def get_neighbour_tunes_by_pattern(pattern):
+def get_neighbour_tunes_by_pattern(pattern, click_num):
+    offset = NUM_NODES*int(click_num)
     sparql_query =       """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                             PREFIX mm:<http://w3id.org/polifonia/ontology/music-meta/>
                             PREFIX ptn:<http://w3id.org/polifonia/resource/pattern/>
@@ -177,7 +179,8 @@ def get_neighbour_tunes_by_pattern(pattern):
                                 ?musicalComposition jams:tuneId ?id.
                                 ?musicalComposition jams:tuneFamily ?family.
                                 OPTIONAL {?musicalComposition mm:title ?title}
-                            } LIMIT 5"""
+                            }  ORDER BY ?title
+                            OFFSET """ + str(offset) + " LIMIT " + str(NUM_NODES)
     return sparql_query
 
 

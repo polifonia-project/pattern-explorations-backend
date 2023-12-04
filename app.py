@@ -125,6 +125,7 @@ def getNeighbourPatterns():
     # Generate the SPARQL query
     #print(query_params)
     sparql_query = get_neighbour_patterns_by_tune(query_params['id'],
+                                                  query_params['click_num'],
                                                   query_params['excludeTrivialPatterns'])
     # Execute the SPARQL query
     response = requests.post(
@@ -149,7 +150,8 @@ def getNeighbourTunes():
     query_params = request.args.to_dict()
     # Generate the SPARQL query
     #print(query_params)
-    sparql_query = get_neighbour_tunes_by_pattern(query_params['id'])
+    sparql_query = get_neighbour_tunes_by_pattern(query_params['id'],
+                                                  query_params['click_num'],)
     # Execute the SPARQL query
     response = requests.post(
         BLAZEGRAPH_URL,
@@ -240,6 +242,6 @@ def getTunesContainingPattern():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
     #app.run(host='192.168.0.94')
     #app.run(host='10.226.144.193')
