@@ -3,3 +3,4 @@ Flask_Cors==3.0.10
 Requests==2.31.0
 fuzzywuzzy~=0.18.0
 singleton-decorator
+python-Levenshtein
