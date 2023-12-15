@@ -211,6 +211,33 @@ def get_tune_family_members(family):
     return sparql_query
 
 
+def get_neighbour_tunes_by_common_patterns(id, click_num):
+    offset = NUM_NODES*int(click_num)
+    sparql_query =       """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+                            PREFIX mm:<http://w3id.org/polifonia/ontology/music-meta/>
+                            PREFIX ptn:<http://w3id.org/polifonia/resource/pattern/>
+                            SELECT DISTINCT ?title ?id ?family
+                            WHERE
+                            {
+                                ?givenTune jams:tuneId \"""" + id + """\".
+                                ?givenTune jams:tuneId ?givenTuneId.
+                                ?givenAnnot jams:isJAMSAnnotationOf ?givenTune.
+                                ?givenAnnot jams:includesObservation ?givenObs.
+                                ?givenObs jams:ofPattern ?pattern.
+                                ?otherObs jams:ofPattern ?pattern.
+                                ?otherAnnot jams:includesObservation ?otherObs.
+                                ?otherAnnot jams:isJAMSAnnotationOf ?otherTune.
+                                ?otherTune jams:tuneId ?id.
+                                FILTER(?id != ?givenTuneId).
+                                ?otherTune mm:title ?title.
+                                ?otherTune jams:tuneFamily ?family.
+                                ?givenObs jams:hasPatternComplexity ?givenPatternComplexity.
+                                ?otherObs jams:hasPatternComplexity ?otherPatternComplexity.
+                            }  ORDER BY DESC(?givenPatternComplexity) DESC(?otherPatternComplexity)
+                            OFFSET """ + str(offset) + " LIMIT " + str(NUM_NODES)
+    return sparql_query
+
+
 if __name__ == "__main__":
     # Generate the SPARQL query
     sparql_query = get_tune_given_name("Yankee Doodle")
