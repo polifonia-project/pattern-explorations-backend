@@ -88,34 +88,35 @@ def advanced_search(query_params, matched_ids):
                         {
                         """
 
-    if query_params['pattern']:
-        sparql_query +=     "?obs jams:ofPattern ptn:" + query_params['pattern'] + """.
+    if query_params['pattern'][0]:
+        sparql_query +=     "?obs jams:ofPattern ptn:" + query_params['pattern'][0] + """.
                             ?annotation jams:includesObservation ?obs.
                             ?annotation jams:isJAMSAnnotationOf ?tune.
                             """
 
-    if query_params['corpus']:
-        sparql_query +=     """?file prov:wasDerivedFrom ?corpus .
-                            FILTER (CONTAINS(?corpus, \""""+ query_params['corpus'] + """\")) .
-                            ?tune prov:wasDerivedFrom ?file.
-                            """
+    if 'corpus' in query_params:
+        sparql_query +=     """?tune prov:wasDerivedFrom ?file .
+                            ?file prov:wasDerivedFrom ?corpus .
+                            VALUES (?corpus) { ( \""""
+        sparql_query += "\" ) ( \"".join(query_params['corpus'])
+        sparql_query += "\" ) }\n"
 
-    if query_params['tuneType']:
-        sparql_query +=     "?tune jams:tuneType ttype:" + query_params['tuneType'] + " .\n"
+    if query_params['tuneType'][0]:
+        sparql_query +=     "?tune jams:tuneType ttype:" + query_params['tuneType'][0] + " .\n"
     else:
         sparql_query +=     "OPTIONAL {?tune jams:tuneType ?tuneType}\n"
 
-    if query_params['key']:
-        sparql_query +=     "?tune jams:key key:" + query_params['key'] + " .\n"
+    if query_params['key'][0]:
+        sparql_query +=     "?tune jams:key key:" + query_params['key'][0] + " .\n"
     else:
         sparql_query +=     "OPTIONAL {?tune jams:key ?key}\n"
 
-    if query_params['timeSignature']:
-        sparql_query += "   ?tune jams:timeSignature tsig:" + query_params['timeSignature'] + " .\n"
+    if query_params['timeSignature'][0]:
+        sparql_query += "   ?tune jams:timeSignature tsig:" + query_params['timeSignature'][0] + " .\n"
     else:
         sparql_query += "   OPTIONAL {?tune jams:timeSignature ?signature}\n"
 
-    if query_params['title']:
+    if query_params['title'][0]:
         sparql_query +=  """?tune mm:title ?tune_name .
                             VALUES(?title ?match_strength ?id) {( \""""
         sparql_query += "\" ) ( \"".join(['\" \"'.join(map(str,tup)) for tup in matched_ids])
@@ -124,7 +125,7 @@ def advanced_search(query_params, matched_ids):
         sparql_query += "   OPTIONAL {?tune mm:title ?tune_name}\n"
 
     sparql_query +=     "?tune jams:tuneId ?id.}"
-    if query_params['title']:
+    if query_params['title'][0]:
         sparql_query += " ORDER BY DESC(xsd:integer(?match_strength)) ?title"
     else:
         sparql_query += " ORDER BY ?tune_name"
@@ -235,6 +236,17 @@ def get_neighbour_tunes_by_common_patterns(id, click_num):
                                 ?otherObs jams:hasPatternComplexity ?otherPatternComplexity.
                             }  ORDER BY DESC(?givenPatternComplexity) DESC(?otherPatternComplexity)
                             OFFSET """ + str(offset) + " LIMIT " + str(NUM_NODES)
+    return sparql_query
+
+
+def get_corpus_list():
+    sparql_query =   """PREFIX prov:<http://www.w3.org/ns/prov#>
+                        SELECT distinct ?corpus
+                        WHERE
+                        {
+                            ?tune prov:wasDerivedFrom ?file .
+                            ?file prov:wasDerivedFrom ?corpus .
+                        }"""
     return sparql_query
 
 

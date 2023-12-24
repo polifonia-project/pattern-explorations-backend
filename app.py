@@ -6,7 +6,8 @@ from query_factory import (get_tune_given_name, get_pattern_search_query,
                            get_neighbour_patterns_by_tune, get_neighbour_tunes_by_pattern,
                            get_tune_data, get_tune_family_members,
                            get_patterns_in_common_between_two_tunes,
-                           get_neighbour_tunes_by_common_patterns)
+                           get_neighbour_tunes_by_common_patterns,
+                           get_corpus_list)
 
 from fuzzy_search import FuzzySearch
 
@@ -20,13 +21,15 @@ fuzzy_search = FuzzySearch(BLAZEGRAPH_URL)
 
 @app.route('/api/search', methods=['GET'])
 def search():
+    #print(request)
     # Get the query parameters from the GET request
-    query_params = request.args.to_dict()
-    # Compostion Title based search
-    search_type = query_params['searchType']
+    query_params = request.args.to_dict(flat=False)
+    # Composition title based search
+    search_type = query_params['searchType'][0]
+    #print(query_params)
     sparql_query = ""
     if search_type == "title":
-        search_term = query_params['searchTerm']
+        search_term = query_params['searchTerm'][0]
         fuzzy_title_matches = fuzzy_search.get_title_best_match(search_term)
         if not fuzzy_title_matches:
             # If there are no matched titles, return an empty response.
@@ -36,15 +39,15 @@ def search():
             sparql_query = get_tune_given_name(fuzzy_title_matches)
     # Patters based search
     elif search_type == "pattern":
-        search_term = query_params['searchTerm']
+        search_term = query_params['searchTerm'][0]
         sparql_query = get_pattern_search_query(search_term)
     # Advanced search
     elif search_type == "advanced":
         matched_tuples = []
-        if query_params['title']:
-            search_term = query_params['title']
+        if query_params['title'][0]:
+            search_term = query_params['title'][0]
             matched_tuples = fuzzy_search.get_title_best_match(search_term)
-        if query_params['title'] and not matched_tuples:
+        if query_params['title'][0] and not matched_tuples:
             # If a title is searched for and there are no matched titles, return an empty response.
             return jsonify(EMPTY_SEARCH_RESPONSE), 200
         else:
@@ -60,6 +63,8 @@ def search():
             'format': 'json'
         }
     )
+    #print(sparql_query)
+    #print(response.text)
     # Check the response status
     if response.status_code != 200:
         print(f"Error executing Sparql Query = {sparql_query}")
@@ -69,10 +74,29 @@ def search():
     return jsonify(response.json()), 200
 
 
-@app.route('/api/similarity-measures', methods=['GET'])
-def similarity_measures_api():
-    # Return a list of similarity measures
-    return jsonify(["Measure 1", "Measure 2", "Measure 3"]), 200
+@app.route('/api/corpus_list', methods=['GET'])
+def getCorpusList():
+    # Generate the SPARQL query
+    sparql_query = get_corpus_list()
+    # Execute the SPARQL query
+    response = requests.post(
+        BLAZEGRAPH_URL,
+        data={
+            'query': sparql_query,
+            'format': 'json'
+        }
+    )
+    #print(sparql_query)
+    #print(response.text)
+    # Check the response status
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to execute SPARQL query'}), 500
+    corpusJSON = response.json()
+    corpus_list = [item['corpus']['value'] for item in
+                 corpusJSON['results']['bindings']]
+    print(corpus_list)
+    # Return the JSON data
+    return jsonify(corpus_list), 200
 
 
 @app.route('/api/patterns', methods=['GET'])
