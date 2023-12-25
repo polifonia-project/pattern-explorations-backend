@@ -7,7 +7,8 @@ from query_factory import (get_tune_given_name, get_pattern_search_query,
                            get_tune_data, get_tune_family_members,
                            get_patterns_in_common_between_two_tunes,
                            get_neighbour_tunes_by_common_patterns,
-                           get_corpus_list)
+                           get_corpus_list, get_keys_list, get_time_sig_list,
+                           get_tune_type_list)
 
 from fuzzy_search import FuzzySearch
 
@@ -94,9 +95,84 @@ def getCorpusList():
     corpusJSON = response.json()
     corpus_list = [item['corpus']['value'] for item in
                  corpusJSON['results']['bindings']]
-    print(corpus_list)
+    #print(corpus_list)
     # Return the JSON data
     return jsonify(corpus_list), 200
+
+
+@app.route('/api/keys_list', methods=['GET'])
+def getKeysList():
+    # Generate the SPARQL query
+    sparql_query = get_keys_list()
+    # Execute the SPARQL query
+    response = requests.post(
+        BLAZEGRAPH_URL,
+        data={
+            'query': sparql_query,
+            'format': 'json'
+        }
+    )
+    #print(sparql_query)
+    #print(response.text)
+    # Check the response status
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to execute SPARQL query'}), 500
+    keysJSON = response.json()
+    keys_list = [item['key']['value'].split("/").pop() for item in
+                 keysJSON['results']['bindings']]
+    #print(keys_list)
+    # Return the JSON data
+    return jsonify(keys_list), 200
+
+
+@app.route('/api/time_sig_list', methods=['GET'])
+def getTimeSignatureList():
+    # Generate the SPARQL query
+    sparql_query = get_time_sig_list()
+    # Execute the SPARQL query
+    response = requests.post(
+        BLAZEGRAPH_URL,
+        data={
+            'query': sparql_query,
+            'format': 'json'
+        }
+    )
+    #print(sparql_query)
+    #print(response.text)
+    # Check the response status
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to execute SPARQL query'}), 500
+    timeSigJSON = response.json()
+    time_sig_list = [item['signature']['value'].split("/").pop() for item in
+                 timeSigJSON['results']['bindings']]
+    #print(time_sig_list)
+    # Return the JSON data
+    return jsonify(time_sig_list), 200
+
+
+@app.route('/api/tune_type_list', methods=['GET'])
+def getTuneTypeList():
+    # Generate the SPARQL query
+    sparql_query = get_tune_type_list()
+    # Execute the SPARQL query
+    response = requests.post(
+        BLAZEGRAPH_URL,
+        data={
+            'query': sparql_query,
+            'format': 'json'
+        }
+    )
+    #print(sparql_query)
+    #print(response.text)
+    # Check the response status
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to execute SPARQL query'}), 500
+    tuneTypeJSON = response.json()
+    tune_type_list = [item['tuneType']['value'].split("/").pop() for item in
+                 tuneTypeJSON['results']['bindings']]
+    #print(tune_type_list)
+    # Return the JSON data
+    return jsonify(tune_type_list), 200
 
 
 @app.route('/api/patterns', methods=['GET'])

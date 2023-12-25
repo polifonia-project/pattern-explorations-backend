@@ -101,18 +101,27 @@ def advanced_search(query_params, matched_ids):
         sparql_query += "\" ) ( \"".join(query_params['corpus'])
         sparql_query += "\" ) }\n"
 
-    if query_params['tuneType'][0]:
-        sparql_query +=     "?tune jams:tuneType ttype:" + query_params['tuneType'][0] + " .\n"
+    if 'tuneType' in query_params:
+        sparql_query +=     """?tune jams:tuneType ?tuneType .\n
+                            VALUES (?tuneType) { ( \""""
+        sparql_query += "\" ) ( ttype:\"".join(query_params['tuneType'])
+        sparql_query += "\" ) }\n"
     else:
         sparql_query +=     "OPTIONAL {?tune jams:tuneType ?tuneType}\n"
 
-    if query_params['key'][0]:
-        sparql_query +=     "?tune jams:key key:" + query_params['key'][0] + " .\n"
+    if 'key' in query_params:
+        sparql_query +=     """?tune jams:key ?key .\n
+                            VALUES (?key) { ( \""""
+        sparql_query += "\" ) ( key:\"".join(query_params['key'])
+        sparql_query += "\" ) }\n"
     else:
         sparql_query +=     "OPTIONAL {?tune jams:key ?key}\n"
 
-    if query_params['timeSignature'][0]:
-        sparql_query += "   ?tune jams:timeSignature tsig:" + query_params['timeSignature'][0] + " .\n"
+    if 'timeSignature' in query_params:
+        sparql_query +=     """?tune jams:timeSignature ?timeSignature .\n
+                            VALUES (?timeSignature) { ( \""""
+        sparql_query += "\" ) ( tsig:\"".join(query_params['timeSignature'])
+        sparql_query += "\" ) }\n"
     else:
         sparql_query += "   OPTIONAL {?tune jams:timeSignature ?signature}\n"
 
@@ -246,6 +255,36 @@ def get_corpus_list():
                         {
                             ?tune prov:wasDerivedFrom ?file .
                             ?file prov:wasDerivedFrom ?corpus .
+                        }"""
+    return sparql_query
+
+
+def get_keys_list():
+    sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+                        SELECT distinct ?key
+                        WHERE
+                        {
+                            ?tune jams:key ?key .
+                        }"""
+    return sparql_query
+
+
+def get_time_sig_list():
+    sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+                        SELECT distinct ?signature
+                        WHERE
+                        {
+                            ?tune jams:timeSignature ?signature .
+                        }"""
+    return sparql_query
+
+
+def get_tune_type_list():
+    sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+                        SELECT distinct ?tuneType
+                        WHERE
+                        {
+                            ?tune jams:tuneType ?tuneType .
                         }"""
     return sparql_query
 
