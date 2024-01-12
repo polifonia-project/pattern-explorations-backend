@@ -213,7 +213,7 @@ def get_tune_family_members(family):
                             SELECT distinct ?title ?id ?type
                             WHERE
                             {
-                                ?tune jams:tuneFamily fam:"""+family+""".
+                                ?tune jams:tuneFamily <http://w3id.org/polifonia/resource/tunefamily/"""+ family +""">.
                                 OPTIONAL {?tune mm:title ?title}
                                 OPTIONAL {?tune jams:tuneId ?id}
                                 OPTIONAL {?tune jams:tuneType ?type}
