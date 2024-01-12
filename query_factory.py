@@ -17,7 +17,7 @@ def get_pattern_search_query(pattern):
                             OPTIONAL {?musicalComposition jams:tuneType ?tuneType}
                             OPTIONAL {?musicalComposition jams:key ?key}
                             OPTIONAL {?musicalComposition jams:timeSignature ?signature}
-                        } ORDER BY ?tune_name"""
+                        } ORDER BY ?tune_name ?id"""
     return sparql_query
 
 
@@ -70,7 +70,7 @@ def get_tune_given_name(matched_ids):
                             OPTIONAL {?tune jams:timeSignature ?signature}
                             VALUES (?title ?match_strength ?id) { ( \""""
     sparql_query += "\" ) ( \"".join(['\" \"'.join(map(str,tup)) for tup in matched_ids])
-    sparql_query += "\" ) }\n} ORDER BY DESC(xsd:integer(?match_strength)) ?title"
+    sparql_query += "\" ) }\n} ORDER BY DESC(xsd:integer(?match_strength)) ?title ?id"
     return sparql_query
 
 
@@ -135,9 +135,9 @@ def advanced_search(query_params, matched_ids):
 
     sparql_query +=     "?tune jams:tuneId ?id.}"
     if query_params['title'][0]:
-        sparql_query += " ORDER BY DESC(xsd:integer(?match_strength)) ?title"
+        sparql_query += " ORDER BY DESC(xsd:integer(?match_strength)) ?title ?id"
     else:
-        sparql_query += " ORDER BY ?tune_name"
+        sparql_query += " ORDER BY ?tune_name ?id"
     return sparql_query
 
 
