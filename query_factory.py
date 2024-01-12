@@ -103,25 +103,25 @@ def advanced_search(query_params, matched_ids):
 
     if 'tuneType' in query_params:
         sparql_query +=     """?tune jams:tuneType ?tuneType .\n
-                            VALUES (?tuneType) { ( \""""
-        sparql_query += "\" ) ( ttype:\"".join(query_params['tuneType'])
-        sparql_query += "\" ) }\n"
+                            VALUES (?tuneType) { ( """
+        sparql_query += " ) ( ttype:".join(query_params['tuneType'])
+        sparql_query += " ) }\n"
     else:
         sparql_query +=     "OPTIONAL {?tune jams:tuneType ?tuneType}\n"
 
     if 'key' in query_params:
         sparql_query +=     """?tune jams:key ?key .\n
-                            VALUES (?key) { ( \""""
-        sparql_query += "\" ) ( key:\"".join(query_params['key'])
-        sparql_query += "\" ) }\n"
+                            VALUES (?key) { ( """
+        sparql_query += " ) ( key:".join(query_params['key'])
+        sparql_query += " ) }\n"
     else:
         sparql_query +=     "OPTIONAL {?tune jams:key ?key}\n"
 
     if 'timeSignature' in query_params:
         sparql_query +=     """?tune jams:timeSignature ?timeSignature .\n
-                            VALUES (?timeSignature) { ( \""""
-        sparql_query += "\" ) ( tsig:\"".join(query_params['timeSignature'])
-        sparql_query += "\" ) }\n"
+                            VALUES (?timeSignature) { ( """
+        sparql_query += " ) ( tsig:".join(query_params['timeSignature'])
+        sparql_query += " ) }\n"
     else:
         sparql_query += "   OPTIONAL {?tune jams:timeSignature ?signature}\n"
 
