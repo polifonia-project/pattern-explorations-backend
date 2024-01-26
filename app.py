@@ -118,7 +118,7 @@ def getKeysList():
     if response.status_code != 200:
         return jsonify({'error': 'Failed to execute SPARQL query'}), 500
     keysJSON = response.json()
-    keys_list = [item['key']['value'].split("/").pop() for item in
+    keys_list = [item['key']['value'] for item in
                  keysJSON['results']['bindings']]
     #print(keys_list)
     # Return the JSON data
@@ -143,7 +143,7 @@ def getTimeSignatureList():
     if response.status_code != 200:
         return jsonify({'error': 'Failed to execute SPARQL query'}), 500
     timeSigJSON = response.json()
-    time_sig_list = [item['signature']['value'].split("/").pop() for item in
+    time_sig_list = [item['signature']['value'] for item in
                  timeSigJSON['results']['bindings']]
     #print(time_sig_list)
     # Return the JSON data
@@ -168,7 +168,7 @@ def getTuneTypeList():
     if response.status_code != 200:
         return jsonify({'error': 'Failed to execute SPARQL query'}), 500
     tuneTypeJSON = response.json()
-    tune_type_list = [item['tuneType']['value'].split("/").pop() for item in
+    tune_type_list = [item['tuneType']['value'] for item in
                  tuneTypeJSON['results']['bindings']]
     #print(tune_type_list)
     # Return the JSON data
@@ -190,6 +190,7 @@ def getPatterns():
             'format': 'json'
         }
     )
+
     # Check the response status
     if response.status_code != 200:
         return jsonify({'error': 'Failed to execute SPARQL query'}), 500
@@ -310,6 +311,7 @@ def getTuneData():
             'format': 'json'
         }
     )
+
     #print(sparql_query)
     #print(response.text)
     # Check the response status
@@ -334,8 +336,8 @@ def getTuneFamilyMembers():
             'format': 'json'
         }
     )
-    print(sparql_query)
-    print(response.text)
+    #print(sparql_query)
+    #print(response.text)
     # Check the response status
     if response.status_code != 200:
         return jsonify({'error': 'Failed to execute SPARQL query'}), 500
