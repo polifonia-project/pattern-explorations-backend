@@ -129,8 +129,9 @@ def advanced_search(query_params, matched_ids):
                             """
 
     if 'corpus' in query_params:
-        sparql_query +=     """?tune core:isMemberOf ?corpus .
-                            ?corpus core:isDefinedBy <http://w3id.org/polifonia/resource/CollectionConcept/Corpus>.
+        sparql_query +=     """?tune core:isMemberOf ?corpusURI .
+                            ?corpusURI core:isDefinedBy <http://w3id.org/polifonia/resource/tunes/CollectionConcept/ElectronicCollection>.
+                            ?corpusURI core:name ?corpus.
                             VALUES (?corpus) { ( \""""
         sparql_query += "\" ) ( \"".join(query_params['corpus'])
         sparql_query += "\" ) }\n"
@@ -333,8 +334,9 @@ def get_corpus_list():
                         WHERE
                         {
                             ?tune rdf:type mm:MusicEntity.
-                            ?tune core:isMemberOf ?corpus.
-                            ?corpus core:isDefinedBy <http://w3id.org/polifonia/resource/CollectionConcept/Corpus>.
+                            ?tune core:isMemberOf ?corpusURI.
+                            ?corpusURI core:isDefinedBy <http://w3id.org/polifonia/resource/tunes/CollectionConcept/ElectronicCollection>.
+                            ?corpusURI core:name ?corpus.
                         } ORDER BY ?corpus"""
     return sparql_query
 
@@ -373,6 +375,18 @@ def get_tune_type_list():
                             ?tune mm:hasFormType ?tuneTypeURI.
                             ?tuneTypeURI core:name ?tuneType.
                         } ORDER BY ?tuneType"""
+    return sparql_query
+
+
+# Return the release version of the knowledge graph.
+# Is there a risk of multiple results?
+def get_kg_version():
+    sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
+                        SELECT DISTINCT ?version
+                        WHERE
+                        {
+                            ?s jams:release ?version
+                        }"""
     return sparql_query
 
 

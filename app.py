@@ -8,7 +8,7 @@ from query_factory import (get_tune_given_name, get_pattern_search_query,
                            get_patterns_in_common_between_two_tunes,
                            get_neighbour_tunes_by_common_patterns,
                            get_corpus_list, get_keys_list, get_time_sig_list,
-                           get_tune_type_list)
+                           get_tune_type_list, get_kg_version)
 
 from fuzzy_search import FuzzySearch
 
@@ -369,8 +369,28 @@ def getTunesContainingPattern():
     return jsonify(response.json()), 200
 
 
+@app.route('/api/kg_version', methods=['GET'])
+def getKGVersion():
+    # Generate the SPARQL query
+    sparql_query = get_kg_version()
+    # Execute the SPARQL query
+    response = requests.post(
+        BLAZEGRAPH_URL,
+        data={
+            'query': sparql_query,
+            'format': 'json'
+        }
+    )
+    #print(sparql_query)
+    #print(response.text)
+    # Check the response status
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to execute SPARQL query'}), 500
+    # Return the JSON data
+    return jsonify(response.json()), 200
+
+
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    #app.run(debug=True, port=5000)
     #app.run(host='0.0.0.0', port=443)
-    #app.run(host='192.168.0.94')
-    #app.run(host='10.226.144.220')
+    app.run(host='0.0.0.0', port=5000)
