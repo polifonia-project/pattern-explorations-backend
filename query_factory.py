@@ -99,8 +99,8 @@ def get_tune_given_name(matched_ids):
                             OPTIONAL {?tune jams:timeSignature ?signatureURI.
                                ?signatureURI mm:timesig ?signature.}
                             VALUES (?title ?match_strength ?id) { ( \""""
-    sparql_query += "\" ) ( \"".join(['\" \"'.join(map(str,tup)) for tup in matched_ids])
-    sparql_query += "\" ) }\n} ORDER BY DESC(xsd:integer(?match_strength)) ?title ?id LIMIT 200"
+    sparql_query += """\" ) ( \"""".join(['\" \"'.join(map(str,tup)) for tup in matched_ids])
+    sparql_query += """\" ) }\n} ORDER BY DESC(xsd:integer(?match_strength)) ?title ?id LIMIT 200"""
     return sparql_query
 
 
@@ -122,7 +122,7 @@ def advanced_search(query_params, matched_ids):
                         """
 
     if query_params['pattern'][0]:
-        sparql_query +=     "?patternURI xyz:pattern_content \"" + query_params['pattern'][0] + """\".
+        sparql_query +=     """?patternURI xyz:pattern_content \"""" + query_params['pattern'][0] + """\".
                             ?obs jams:ofPattern ?patternURI.
                             ?annotation jams:includesObservation ?obs.
                             ?annotation jams:isJAMSAnnotationOf ?tune.
@@ -133,15 +133,15 @@ def advanced_search(query_params, matched_ids):
                             ?corpusURI core:isDefinedBy <http://w3id.org/polifonia/resource/tunes/CollectionConcept/ElectronicCollection>.
                             ?corpusURI core:name ?corpus.
                             VALUES (?corpus) { ( \""""
-        sparql_query += "\" ) ( \"".join(query_params['corpus'])
-        sparql_query += "\" ) }\n"
+        sparql_query += """\" ) ( \"""".join(query_params['corpus'])
+        sparql_query += """\" ) }\n"""
 
     if 'tuneType' in query_params:
         sparql_query +=     """?tune mm:hasFormType ?tuneTypeURI .\n
                             ?tuneTypeURI core:name ?tuneType .\n 
                             VALUES (?tuneType) { ( \""""
-        sparql_query += "\" ) ( \"".join(query_params['tuneType'])
-        sparql_query += "\" ) }\n"
+        sparql_query += """\" ) ( \"""".join(query_params['tuneType'])
+        sparql_query += """\" ) }\n"""
     else:
         sparql_query +=     """OPTIONAL {?tune mm:hasFormType ?tuneTypeURI.\n
                                   ?tuneTypeURI core:name ?tuneType.}\n"""
@@ -150,8 +150,8 @@ def advanced_search(query_params, matched_ids):
         sparql_query +=     """?tune mm:hasKey ?keyURI .\n
                             ?keyURI mm:tuneKeyName ?key.\n
                             VALUES (?key) { ( \""""
-        sparql_query += "\" ) ( \"".join(query_params['key'])
-        sparql_query += "\" ) }\n"
+        sparql_query += """\" ) ( \"""".join(query_params['key'])
+        sparql_query += """\" ) }\n"""
     else:
         sparql_query +=     """OPTIONAL {?tune mm:hasKey ?keyURI.\n
                                   ?keyURI mm:tuneKeyName ?key.}\n"""
@@ -160,8 +160,8 @@ def advanced_search(query_params, matched_ids):
         sparql_query +=     """?tune jams:timeSignature ?timeSignatureURI .\n
                             ?timeSignatureURI mm:timesig ?signature.\n
                             VALUES (?signature) { ( \""""
-        sparql_query += "\" ) ( \"".join(query_params['timeSignature'])
-        sparql_query += "\" ) }\n"
+        sparql_query += """\" ) ( \"""".join(query_params['timeSignature'])
+        sparql_query += """\" ) }\n"""
     else:
         sparql_query += """OPTIONAL {?tune jams:timeSignature ?signatureURI.\n
                               ?signatureURI mm:timesig ?signature.}\n"""
@@ -169,8 +169,8 @@ def advanced_search(query_params, matched_ids):
     if query_params['title'][0]:
         sparql_query +=  """?tune core:title ?tune_name .\n
                             VALUES(?title ?match_strength ?id) {( \""""
-        sparql_query += "\" ) ( \"".join(['\" \"'.join(map(str,tup)) for tup in matched_ids])
-        sparql_query += "\" ) }\n"
+        sparql_query += """\" ) ( \"""".join(['\" \"'.join(map(str,tup)) for tup in matched_ids])
+        sparql_query += """\" ) }\n"""
     else:
         sparql_query += "   OPTIONAL {?tune core:title ?tune_name}\n"
 
@@ -219,7 +219,7 @@ def get_neighbour_patterns_by_tune(id, click_num, excludeTrivialPatterns):
                         """
     sparql_query +=     """?patternURI xyz:pattern_content ?pattern.
                         } group by ?pattern order by ?comp DESC (?patternFreq)
-                        OFFSET """ + str(offset) + " LIMIT " + str(NUM_NODES)
+                        OFFSET """ + str(offset) + """ LIMIT """ + str(NUM_NODES)
     return sparql_query
 
 
@@ -246,7 +246,7 @@ def get_neighbour_tunes_by_pattern(pattern, click_num):
                                 ?tuneFamilyURI mm:tuneFamilyName ?family.
                                 OPTIONAL {?tune core:title ?title}
                             }  ORDER BY ?title ?id
-                            OFFSET """ + str(offset) + " LIMIT " + str(NUM_NODES)
+                            OFFSET """ + str(offset) + """ LIMIT """ + str(NUM_NODES)
     return sparql_query
 
 
@@ -321,7 +321,7 @@ def get_neighbour_tunes_by_common_patterns(id, click_num):
                                 ?patternURI xyz:pattern_content ?pattern.
                                 ?patternURI xyz:pattern_complexity ?complexity.
                             }  ORDER BY DESC(?complexity)
-                            OFFSET """ + str(offset) + " LIMIT " + str(NUM_NODES)
+                            OFFSET """ + str(offset) + """ LIMIT """ + str(NUM_NODES)
     return sparql_query
 
 
