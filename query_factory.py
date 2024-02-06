@@ -52,7 +52,7 @@ def get_most_common_patterns_for_a_tune(id, excludeTrivialPatterns):
                         """
     sparql_query += """?patternURI xyz:pattern_content ?pattern.
                         } group by ?pattern
-                        order by DESC (?patternFreq) LIMIT 10"""
+                        order by DESC (?patternFreq) ?pattern LIMIT 10"""
     return sparql_query
 
 
