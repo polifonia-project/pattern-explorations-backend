@@ -11,6 +11,13 @@ release-date: 01/03/2024
 release-number: v0.1.0
 licence:
 - GNU_GPL_v3
+bibliography:
+- publication: 
+  - "Polifonia Deliverable 5.6"
+links:
+- https://github.com/polifonia-project/pattern-explorations-backend
+- https://polifonia.disi.unibo.it:8080/patterns (TODO)
+- https://zenodo.org/record/ (TODO)
 contributors:
 - James McDermott <https://github.com/jmmcd>
 - Pushkar Jajoria <https://github.com/pushkarjajoria>
