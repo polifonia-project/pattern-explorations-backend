@@ -37,6 +37,8 @@ credits: "This project has received funding from the European Union’s Horizon 
 
 A Python Flask server providing APIs for searching musical tunes and retrieving similarity measures. It can be connected to a SPARQL endpoint but currently uses a mock response.
 
+This software forms part of Polifonia Deliverable D5.6.
+
 ## Prerequisites
 
 Ensure you have Python and pip installed on your machine. I'd recommend using a environment manager like miniconda to keep everything sane.
