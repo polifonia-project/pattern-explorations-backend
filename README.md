@@ -1,6 +1,6 @@
 ---
 component-id: pattern-explorations-backend
-type: Software
+type: WebApplication
 name: Pattern Exploration Backend
 description: A server that requests and processes data from the [Patterns Knowledge Graph](https://github.com/polifonia-project/patterns-knowledge-graph) on behalf of the [Pattern Exploration GUI](https://github.com/polifonia-project/pattern-exploration-gui).
 work-package:
