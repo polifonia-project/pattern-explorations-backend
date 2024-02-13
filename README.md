@@ -1,6 +1,6 @@
 ---
 component-id: pattern-explorations-backend
-type: Software
+type: WebApplication
 name: Pattern Exploration Backend
 description: A server that requests and processes data from the [Patterns Knowledge Graph](https://github.com/polifonia-project/patterns-knowledge-graph) on behalf of the [Pattern Exploration GUI](https://github.com/polifonia-project/pattern-exploration-gui).
 work-package:
@@ -19,8 +19,13 @@ related-components:
 - reuses:
   - "pattern-exploration-gui"
   - "patterns-knowledge-graph"
+bibliography:
+- publication: 
+  - "Polifonia Deliverable 5.6"
 links:
 - https://github.com/polifonia-project/pattern-explorations-backend
+- https://polifonia.disi.unibo.it:8080/patterns (TODO)
+- https://zenodo.org/record/ (TODO)
 funder:
   - name: Horizon 2020 Framework Programme
     url: https://cordis.europa.eu/programme/id/H2020-EC
@@ -31,6 +36,8 @@ credits: "This project has received funding from the European Union’s Horizon 
 # Python Flask Server for Pattern Explorations using the Blazegraph KG
 
 A Python Flask server providing APIs for searching musical tunes and retrieving similarity measures. It can be connected to a SPARQL endpoint but currently uses a mock response.
+
+This software forms part of Polifonia Deliverable D5.6.
 
 ## Prerequisites
 
