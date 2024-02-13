@@ -9,6 +9,7 @@ from query_factory import (get_tune_given_name, get_pattern_search_query,
                            get_neighbour_tunes_by_common_patterns,
                            get_corpus_list, get_keys_list, get_time_sig_list,
                            get_tune_type_list, get_kg_version)
+#from validation import sanitise_input
 
 from fuzzy_search import FuzzySearch
 
@@ -16,6 +17,7 @@ app = Flask(__name__)
 CORS(app)
 
 BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
+#BLAZEGRAPH_URL = '127.0.0.1:9999'
 EMPTY_SEARCH_RESPONSE = {"head":{"vars":["tune_name", "tuneType", "key", "signature", "id"]},"results":{"bindings":[]}}
 fuzzy_search = FuzzySearch(BLAZEGRAPH_URL)
 
@@ -69,7 +71,7 @@ def search():
     # Check the response status
     if response.status_code != 200:
         print(f"Error executing Sparql Query = {sparql_query}")
-        print(response.json())
+        print(response.text)
         return jsonify({'error': 'Failed to execute SPARQL query'}), 500
     # Return the JSON data
     return jsonify(response.json()), 200
@@ -391,7 +393,7 @@ def getKGVersion():
 
 
 if __name__ == "__main__":
-    app.run()
-    #app.run(debug=True, port=5000)
+    #app.run()
+    app.run(debug=True, port=8000)
     #app.run(host='0.0.0.0', port=443)
     #app.run(host='0.0.0.0', port=5000)

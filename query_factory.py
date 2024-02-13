@@ -52,7 +52,7 @@ def get_most_common_patterns_for_a_tune(id, excludeTrivialPatterns):
                         """
     sparql_query += """?patternURI xyz:pattern_content ?pattern.
                         } group by ?pattern
-                        order by DESC (?patternFreq) ?pattern LIMIT 10"""
+                        order by DESC (?patternFreq) ?pattern LIMIT 18"""
     return sparql_query
 
 
@@ -77,7 +77,7 @@ def get_patterns_in_common_between_two_tunes(id, prev):
                             ?observation2 jams:ofPattern ?patternURI .
                             ?patternURI xyz:pattern_content ?pattern .
                         } group by ?pattern
-                        order by DESC (count(?pattern)) ?pattern LIMIT 10"""
+                        order by DESC (count(?pattern)) ?pattern LIMIT 18"""
     return sparql_query
 
 
@@ -205,7 +205,7 @@ def get_neighbour_patterns_by_tune(id, click_num, excludeTrivialPatterns):
                         PREFIX core:<http://w3id.org/polifonia/ontology/core/>
                         PREFIX xyz:<http://sparql.xyz/facade-x/data/>
                         PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                        SELECT ?pattern (count(?pattern) as ?patternFreq)
+                        SELECT ?pattern
                         {
                             ?tune rdf:type mm:MusicEntity.
                             ?tune core:id \"""" + id + """\".
@@ -218,7 +218,7 @@ def get_neighbour_patterns_by_tune(id, click_num, excludeTrivialPatterns):
         sparql_query += """FILTER (?comp > "0.4"^^xsd:float) .
                         """
     sparql_query +=     """?patternURI xyz:pattern_content ?pattern.
-                        } group by ?pattern order by ?comp DESC (?patternFreq)
+                        } group by ?pattern order by DESC(?comp*COUNT(?pattern)) DESC(?comp) DESC(COUNT(?pattern))
                         OFFSET """ + str(offset) + """ LIMIT """ + str(NUM_NODES)
     return sparql_query
 
@@ -232,10 +232,11 @@ def get_neighbour_tunes_by_pattern(pattern, click_num):
                             PREFIX xyz:<http://sparql.xyz/facade-x/data/>
                             PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                             PREFIX tunes:<http://w3id.org/polifonia/ontology/tunes/>
-                            SELECT DISTINCT ?title ?id ?family
+                            SELECT ?title ?id ?family
                             WHERE
                             {
-                                ?patternURI xyz:pattern_content \"""" + pattern + """\".
+                                ?patternURI xyz:pattern_content ?pattern.
+                                VALUES ?pattern { \"""" + pattern + """\" }
                                 ?obs jams:ofPattern ?patternURI.
                                 ?annotation jams:includesObservation ?obs.
                                 ?annotation jams:isJAMSAnnotationOf ?tune.
@@ -245,7 +246,7 @@ def get_neighbour_tunes_by_pattern(pattern, click_num):
                                 ?tuneFamilyURI rdf:type tunes:TuneFamily.
                                 ?tuneFamilyURI mm:tuneFamilyName ?family.
                                 OPTIONAL {?tune core:title ?title}
-                            }  ORDER BY ?title ?id
+                            } GROUP BY ?id ?title ?family ORDER BY DESC(COUNT(?pattern)) ?title ?id
                             OFFSET """ + str(offset) + """ LIMIT """ + str(NUM_NODES)
     return sparql_query
 
@@ -299,28 +300,32 @@ def get_neighbour_tunes_by_common_patterns(id, click_num):
                             PREFIX xyz:<http://sparql.xyz/facade-x/data/>
                             PREFIX tunes:<http://w3id.org/polifonia/ontology/tunes/>
                             PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                            SELECT DISTINCT ?title ?id ?family
-                            WHERE
-                            {
-                                ?givenTune rdf:type mm:MusicEntity.
-                                ?givenTune core:id \"""" + id + """\".
-                                ?givenTune core:id ?givenTuneId.
-                                ?givenAnnot jams:isJAMSAnnotationOf ?givenTune.
-                                ?givenAnnot jams:includesObservation ?givenObs.
-                                ?givenObs jams:ofPattern ?patternURI.
-                                ?otherObs jams:ofPattern ?patternURI.
-                                ?otherAnnot jams:includesObservation ?otherObs.
-                                ?otherAnnot jams:isJAMSAnnotationOf ?otherTune.
-                                ?otherTune rdf:type mm:MusicEntity.
-                                ?otherTune core:id ?id.
-                                FILTER(?id != ?givenTuneId).
-                                ?otherTune core:title ?title.
-                                OPTIONAL{?otherTune core:isMemberOf ?tuneFamilyURI.
-                                ?tuneFamilyURI rdf:type tunes:TuneFamily.
-                                ?tuneFamilyURI mm:tuneFamilyName ?family.}
-                                ?patternURI xyz:pattern_content ?pattern.
-                                ?patternURI xyz:pattern_complexity ?complexity.
-                            }  ORDER BY DESC(?complexity)
+                            SELECT ?title ?id ?family
+                            WHERE {
+                                SELECT ?title ?id ?family ?pattern (COUNT(*) * ?complexity AS ?count_pattern_by_c)
+                                WHERE
+                                {
+                                    ?givenTune rdf:type mm:MusicEntity.
+                                    ?givenTune core:id \"""" + id + """\".
+                                    ?givenTune core:id ?givenTuneId.
+                                    ?givenAnnot jams:isJAMSAnnotationOf ?givenTune.
+                                    ?givenAnnot jams:includesObservation ?givenObs.
+                                    ?givenObs jams:ofPattern ?patternURI.
+                                    ?otherObs jams:ofPattern ?patternURI.
+                                    ?otherAnnot jams:includesObservation ?otherObs.
+                                    ?otherAnnot jams:isJAMSAnnotationOf ?otherTune.
+                                    ?otherTune rdf:type mm:MusicEntity.
+                                    ?otherTune core:id ?id.
+                                    FILTER(?id != ?givenTuneId).
+                                    ?otherTune core:title ?title.
+                                    OPTIONAL{?otherTune core:isMemberOf ?tuneFamilyURI.
+                                    ?tuneFamilyURI rdf:type tunes:TuneFamily.
+                                    ?tuneFamilyURI mm:tuneFamilyName ?family.}
+                                    ?patternURI xyz:pattern_content ?pattern.
+                                    ?patternURI xyz:pattern_complexity ?complexity.
+                                } GROUP BY ?title ?id ?family ?pattern ?complexity
+                            } GROUP BY ?title ?id ?family
+                            ORDER BY DESC(SUM(?count_pattern_by_c))
                             OFFSET """ + str(offset) + """ LIMIT """ + str(NUM_NODES)
     return sparql_query
 
