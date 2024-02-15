@@ -10,23 +10,23 @@ def get_pattern_search_query(pattern):
                         PREFIX core:<http://w3id.org/polifonia/ontology/core/>
                         PREFIX xyz:<http://sparql.xyz/facade-x/data/>
                         PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                        SELECT DISTINCT ?tune_name ?tuneType ?key ?signature ?id
+                        SELECT DISTINCT ?title ?tuneType ?key ?signature ?id
                         WHERE
                         {
 	                        ?obs jams:ofPattern ?patternURI.
 	                        ?patternURI xyz:pattern_content \"""" + pattern + """\".
                             ?annotation jams:includesObservation ?obs.
-                            ?annotation jams:isJAMSAnnotationOf ?musicalComposition.
-                            ?musicalComposition rdf:type mm:MusicEntity.
-                            ?musicalComposition core:id ?id.
-                            OPTIONAL {?musicalComposition core:title ?tune_name}
-                            OPTIONAL {?musicalComposition mm:hasFormType ?tuneTypeURI.
+                            ?annotation jams:isJAMSAnnotationOf ?tune.
+                            ?tune rdf:type mm:MusicEntity.
+                            ?tune core:id ?id.
+                            OPTIONAL {?tune core:title ?title}
+                            OPTIONAL {?tune mm:hasFormType ?tuneTypeURI.
                                ?tuneTypeURI core:name ?tuneType.}
-                            OPTIONAL {?musicalComposition mm:hasKey ?keyURI.
+                            OPTIONAL {?tune mm:hasKey ?keyURI.
                                ?keyURI mm:tuneKeyName ?key.}
-                            OPTIONAL {?musicalComposition jams:timeSignature ?signatureURI.
+                            OPTIONAL {?tune jams:timeSignature ?signatureURI.
                                ?signatureURI mm:timesig ?signature.}
-                        } ORDER BY ?tune_name ?id"""
+                        } ORDER BY ?title ?id"""
     return sparql_query
 
 
@@ -42,8 +42,8 @@ def get_most_common_patterns_for_a_tune(id, excludeTrivialPatterns):
                         WHERE {
                             ?tune rdf:type mm:MusicEntity.
                             ?tune core:id \"""" + id + """\".
-                            ?xx jams:isJAMSAnnotationOf ?tune.
-                            ?xx jams:includesObservation ?observation.
+                            ?annotation jams:isJAMSAnnotationOf ?tune.
+                            ?annotation jams:includesObservation ?observation.
                             ?observation jams:ofPattern ?patternURI.
                         """
     if excludeTrivialPatterns == "true":
@@ -67,13 +67,13 @@ def get_patterns_in_common_between_two_tunes(id, prev):
                         {
                             ?tune1 rdf:type mm:MusicEntity.
                             ?tune1 core:id \"""" + id + """\".
-                            ?xx1 jams:isJAMSAnnotationOf ?tune1.
-                            ?xx1 jams:includesObservation ?observation1 .
+                            ?annotation1 jams:isJAMSAnnotationOf ?tune1.
+                            ?annotation1 jams:includesObservation ?observation1 .
                             ?observation1 jams:ofPattern ?patternURI .
                             ?tune2 rdf:type mm:MusicEntity.
                             ?tune2 core:id \"""" + prev + """\".
-                            ?xx2 jams:isJAMSAnnotationOf ?tune2.
-                            ?xx2 jams:includesObservation ?observation2 .
+                            ?annotation2 jams:isJAMSAnnotationOf ?tune2.
+                            ?annotation2 jams:includesObservation ?observation2 .
                             ?observation2 jams:ofPattern ?patternURI .
                             ?patternURI xyz:pattern_content ?pattern .
                         } group by ?pattern
@@ -87,10 +87,10 @@ def get_tune_given_name(matched_ids):
                         PREFIX mm: <http://w3id.org/polifonia/ontology/music-meta/>
                         PREFIX core:  <http://w3id.org/polifonia/ontology/core/>
                         PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                        SELECT ?tune_name ?tuneType ?key ?signature ?id
+                        SELECT ?title ?tuneType ?key ?signature ?id
                         {
                             ?tune rdf:type mm:MusicEntity.
-                            ?tune core:title ?tune_name.
+                            ?tune core:title ?title.
                             ?tune core:id ?id.
                             OPTIONAL {?tune mm:hasFormType ?tuneTypeURI.
                                ?tuneTypeURI core:name ?tuneType.}
@@ -100,7 +100,7 @@ def get_tune_given_name(matched_ids):
                                ?signatureURI mm:timesig ?signature.}
                             VALUES (?title ?match_strength ?id) { ( \""""
     sparql_query += """\" ) ( \"""".join(['\" \"'.join(map(str,tup)) for tup in matched_ids])
-    sparql_query += """\" ) }\n} ORDER BY DESC(xsd:integer(?match_strength)) ?title ?id LIMIT 200"""
+    sparql_query += """\" ) }\n} ORDER BY DESC(xsd:integer(?match_strength)) ?title ?id"""
     return sparql_query
 
 
@@ -115,7 +115,7 @@ def advanced_search(query_params, matched_ids):
                         PREFIX core:<http://w3id.org/polifonia/ontology/core/>
                         PREFIX xyz:<http://sparql.xyz/facade-x/data/>
                         PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                        SELECT DISTINCT ?tune_name ?tuneType ?key ?signature ?id
+                        SELECT DISTINCT ?title ?tuneType ?key ?signature ?id
                         WHERE
                         {
                             ?tune rdf:type mm:MusicEntity.\n
@@ -167,18 +167,18 @@ def advanced_search(query_params, matched_ids):
                               ?signatureURI mm:timesig ?signature.}\n"""
 
     if query_params['title'][0]:
-        sparql_query +=  """?tune core:title ?tune_name .\n
+        sparql_query +=  """?tune core:title ?title .\n
                             VALUES(?title ?match_strength ?id) {( \""""
         sparql_query += """\" ) ( \"""".join(['\" \"'.join(map(str,tup)) for tup in matched_ids])
         sparql_query += """\" ) }\n"""
     else:
-        sparql_query += "   OPTIONAL {?tune core:title ?tune_name}\n"
+        sparql_query += "   OPTIONAL {?tune core:title ?title}\n"
 
     sparql_query +=     "?tune core:id ?id.}"
     if query_params['title'][0]:
-        sparql_query += " ORDER BY DESC(xsd:integer(?match_strength)) ?title ?id LIMIT 200"
+        sparql_query += " ORDER BY DESC(xsd:integer(?match_strength)) ?title ?id"
     else:
-        sparql_query += " ORDER BY ?tune_name ?id LIMIT 200"
+        sparql_query += " ORDER BY ?title ?id"
     return sparql_query
 
 
@@ -209,8 +209,8 @@ def get_neighbour_patterns_by_tune(id, click_num, excludeTrivialPatterns):
                         {
                             ?tune rdf:type mm:MusicEntity.
                             ?tune core:id \"""" + id + """\".
-                            ?xx jams:isJAMSAnnotationOf ?tune.
-                            ?xx jams:includesObservation ?observation .
+                            ?annotation jams:isJAMSAnnotationOf ?tune.
+                            ?annotation jams:includesObservation ?observation .
                             ?observation jams:ofPattern ?patternURI .
                             ?patternURI xyz:pattern_complexity ?comp.
                         """
