@@ -17,7 +17,7 @@ app = Flask(__name__)
 CORS(app)
 
 BLAZEGRAPH_URL = 'https://polifonia.disi.unibo.it/fonn/sparql'
-#BLAZEGRAPH_URL = '127.0.0.1:9999'
+
 EMPTY_SEARCH_RESPONSE = {"head":{"vars":["tune_name", "tuneType", "key", "signature", "id"]},"results":{"bindings":[]}}
 fuzzy_search = FuzzySearch(BLAZEGRAPH_URL)
 
@@ -393,7 +393,7 @@ def getKGVersion():
 
 
 if __name__ == "__main__":
-    #app.run()
-    app.run(debug=True, port=8000)
+    app.run()
+    #app.run(debug=True, port=8000)
     #app.run(host='0.0.0.0', port=443)
     #app.run(host='0.0.0.0', port=5000)
