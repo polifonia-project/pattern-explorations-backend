@@ -52,7 +52,7 @@ def get_most_common_patterns_for_a_tune(id, excludeTrivialPatterns):
                         """
     sparql_query += """?patternURI xyz:pattern_content ?pattern.
                         } group by ?pattern
-                        order by DESC (?patternFreq) ?pattern LIMIT 18"""
+                        ORDER BY DESC (?patternFreq) ?pattern LIMIT 18"""
     return sparql_query
 
 
@@ -76,8 +76,8 @@ def get_patterns_in_common_between_two_tunes(id, prev):
                             ?annotation2 jams:includesObservation ?observation2 .
                             ?observation2 jams:ofPattern ?patternURI .
                             ?patternURI xyz:pattern_content ?pattern .
-                        } group by ?pattern
-                        order by DESC (count(?pattern)) ?pattern LIMIT 18"""
+                        } GROUP BY ?pattern
+                        ORDER BY DESC (count(?pattern)) ?pattern LIMIT 18"""
     return sparql_query
 
 
@@ -218,7 +218,7 @@ def get_neighbour_patterns_by_tune(id, click_num, excludeTrivialPatterns):
         sparql_query += """FILTER (?comp > "0.4"^^xsd:float) .
                         """
     sparql_query +=     """?patternURI xyz:pattern_content ?pattern.
-                        } group by ?pattern order by DESC(?comp*COUNT(?pattern)) DESC(?comp) DESC(COUNT(?pattern))
+                        } group by ?pattern ORDER BY DESC(?comp*COUNT(?pattern)) DESC(?comp) DESC(COUNT(?pattern))
                         OFFSET """ + str(offset) + """ LIMIT """ + str(NUM_NODES)
     return sparql_query
 
@@ -276,7 +276,7 @@ def get_tune_family_members(family):
                             PREFIX core:  <http://w3id.org/polifonia/ontology/core/>
                             PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                             PREFIX tunes:<http://w3id.org/polifonia/ontology/tunes/>
-                            SELECT DISTINCT ?title ?id ?type
+                            SELECT ?title ?id ?type
                             WHERE
                             {
                                 ?tune rdf:type mm:MusicEntity.
