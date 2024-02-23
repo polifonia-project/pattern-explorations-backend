@@ -9,7 +9,6 @@ from query_factory import (get_tune_given_name, get_pattern_search_query,
                            get_neighbour_tunes_by_common_patterns,
                            get_corpus_list, get_keys_list, get_time_sig_list,
                            get_tune_type_list, get_kg_version)
-#from validation import sanitise_input
 
 from fuzzy_search import FuzzySearch
 
