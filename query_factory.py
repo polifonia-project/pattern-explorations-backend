@@ -50,14 +50,14 @@ def get_most_common_patterns_for_a_tune(id, excludeTrivialPatterns):
         sparql_query += """ ?patternURI xyz:pattern_complexity ?comp.
                             FILTER (?comp > "0.4"^^xsd:float).
                         """
-    sparql_query += """?patternURI xyz:pattern_content ?pattern.
+    sparql_query += """     ?patternURI xyz:pattern_content ?pattern.
                         } group by ?pattern
                         ORDER BY DESC (?patternFreq) ?pattern LIMIT 18"""
     return sparql_query
 
 
 # Return a list of patterns contained in two tunes.
-def get_patterns_in_common_between_two_tunes(id, prev):
+def get_patterns_in_common_between_two_tunes(id, prev, excludeTrivialPatterns):
     sparql_query = """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX core:  <http://w3id.org/polifonia/ontology/core/>
                         PREFIX xyz:  <http://sparql.xyz/facade-x/data/>
@@ -70,7 +70,12 @@ def get_patterns_in_common_between_two_tunes(id, prev):
                             ?annotation1 jams:isJAMSAnnotationOf ?tune1.
                             ?annotation1 jams:includesObservation ?observation1 .
                             ?observation1 jams:ofPattern ?patternURI .
-                            ?tune2 rdf:type mm:MusicEntity.
+                        """
+    if excludeTrivialPatterns == "true":
+        sparql_query += """ ?patternURI xyz:pattern_complexity ?comp.
+                            FILTER (?comp > "0.4"^^xsd:float).
+                        """
+    sparql_query +=     """ ?tune2 rdf:type mm:MusicEntity.
                             ?tune2 core:id \"""" + prev + """\".
                             ?annotation2 jams:isJAMSAnnotationOf ?tune2.
                             ?annotation2 jams:includesObservation ?observation2 .

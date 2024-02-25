@@ -205,7 +205,8 @@ def getCommonPatterns():
     query_params = request.args.to_dict()
     # Generate the SPARQL query
     sparql_query = get_patterns_in_common_between_two_tunes(query_params['id'],
-                                                            query_params['prev'])
+                                                            query_params['prev'],
+                                                            query_params['excludeTrivialPatterns'])
     # Execute the SPARQL query
     response = requests.post(
         BLAZEGRAPH_URL,
