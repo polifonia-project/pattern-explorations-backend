@@ -7,14 +7,14 @@ work-package:
 - WP5
 project: polifonia-project
 resource: https://github.com/polifonia-project/pattern-explorations-backend/releases
-release-date: 01/03/2024
-release-number: v0.1.0
+release-date: 23/02/2024
+release-number: v1.0.0
 licence:
 - GNU_GPL_v3
 contributors:
-- James McDermott <https://github.com/jmmcd>
-- Pushkar Jajoria <https://github.com/pushkarjajoria>
 - Rory Sweeney <https://github.com/rorys4>
+- Pushkar Jajoria <https://github.com/pushkarjajoria>
+- James McDermott <https://github.com/jmmcd>
 related-components:
 - reuses:
   - "pattern-exploration-gui"
@@ -24,8 +24,8 @@ bibliography:
   - "Polifonia Deliverable 5.6"
 links:
 - https://github.com/polifonia-project/pattern-explorations-backend
-- https://polifonia.disi.unibo.it:8080/patterns (TODO)
-- https://zenodo.org/record/ (TODO)
+- https://polifonia.disi.unibo.it/patterns/api
+- https://zenodo.org/records/10698170
 funder:
   - name: Horizon 2020 Framework Programme
     url: https://cordis.europa.eu/programme/id/H2020-EC
@@ -78,5 +78,6 @@ Flask_Cors==3.0.10
 Requests==2.31.0
 fuzzywuzzy~=0.18.0
 singleton-decorator
+python-Levenshtein
 ```
 
