@@ -50,7 +50,8 @@ def search():
             search_term = query_params['title'][0]
             matched_tuples = fuzzy_search.get_title_best_match(search_term)
         if query_params['title'][0] and not matched_tuples:
-            # If a title is searched for and there are no matched titles, return an empty response.
+            # If a title is searched for and there are no matched titles,
+            # return an empty response.
             return jsonify(EMPTY_SEARCH_RESPONSE), 200
         else:
             sparql_query = advanced_search(query_params, matched_tuples)

@@ -223,7 +223,7 @@ def get_neighbour_patterns_by_tune(id, click_num, excludeTrivialPatterns):
         sparql_query += """FILTER (?comp > "0.4"^^xsd:float) .
                         """
     sparql_query +=     """?patternURI xyz:pattern_content ?pattern.
-                        } group by ?pattern ORDER BY DESC(?comp*COUNT(?pattern)) DESC(?comp) DESC(COUNT(?pattern))
+                        } group by ?pattern ORDER BY DESC(?comp*COUNT(?pattern)) DESC(?comp) DESC(COUNT(?pattern)) ?pattern
                         OFFSET """ + str(offset) + """ LIMIT """ + str(NUM_NODES)
     return sparql_query
 
@@ -398,19 +398,3 @@ def get_kg_version():
                             ?s jams:release ?version
                         }"""
     return sparql_query
-
-
-if __name__ == "__main__":
-    # Generate the SPARQL query
-    sparql_query = get_tune_given_name("Yankee Doodle")
-    # Execute the SPARQL query
-    response = requests.post(
-        BLAZEGRAPH_URL,
-        data={
-            'query': sparql_query,
-            'format': 'json'
-        }
-    )
-    # Return the JSON data
-    data = response.json()
-    print(data)
