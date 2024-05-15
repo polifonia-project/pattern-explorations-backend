@@ -87,6 +87,8 @@ def get_patterns_in_common_between_two_tunes(id, prev, excludeTrivialPatterns):
 
 
 # A fuzzy search of tune titles.
+# FIXME: "?annotation jams:isJAMSAnnotationOf ?tune." line added as ad-hoc
+# temporary fix to hide tunes from The Session that don't have pattern data.
 def get_tune_given_name(matched_ids):
     sparql_query =   """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm: <http://w3id.org/polifonia/ontology/music-meta/>
@@ -95,6 +97,7 @@ def get_tune_given_name(matched_ids):
                         SELECT ?title ?tuneType ?key ?signature ?id
                         {
                             ?tune rdf:type mm:MusicEntity.
+                            ?annotation jams:isJAMSAnnotationOf ?tune.
                             ?tune core:title ?title.
                             ?tune core:id ?id.
                             OPTIONAL {?tune mm:hasFormType ?tuneTypeURI.
@@ -110,6 +113,8 @@ def get_tune_given_name(matched_ids):
 
 
 # Advanced search.
+# FIXME: "?annotation jams:isJAMSAnnotationOf ?tune." line added as ad-hoc
+# temporary fix to hide tunes from The Session that don't have pattern data.
 def advanced_search(query_params, matched_ids):
     sparql_query = """PREFIX jams:<http://w3id.org/polifonia/ontology/jams/>
                         PREFIX mm:<http://w3id.org/polifonia/ontology/music-meta/>
@@ -124,6 +129,7 @@ def advanced_search(query_params, matched_ids):
                         WHERE
                         {
                             ?tune rdf:type mm:MusicEntity.\n
+                            ?annotation jams:isJAMSAnnotationOf ?tune.
                         """
 
     if query_params['pattern'][0]:
