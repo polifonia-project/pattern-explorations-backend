@@ -342,8 +342,6 @@ def get_neighbour_tunes_by_common_patterns(id, click_num):
 
 
 # Return a list of all corpus values to populate the advanced search drop-down.
-# FIXME: "?annotation jams:isJAMSAnnotationOf ?tune." line added as ad-hoc
-# temporary fix to hide tunes from The Session that don't have pattern data.
 def get_corpus_list():
     sparql_query =   """PREFIX core:<http://w3id.org/polifonia/ontology/core/>
                         PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -352,7 +350,6 @@ def get_corpus_list():
                         WHERE
                         {
                             ?tune rdf:type mm:MusicEntity.
-                            ?annotation jams:isJAMSAnnotationOf ?tune.
                             ?tune core:isMemberOf ?corpusURI.
                             ?corpusURI core:isDefinedBy <http://w3id.org/polifonia/resource/tunes/CollectionConcept/ElectronicCollection>.
                             ?corpusURI core:name ?corpus.
@@ -384,8 +381,6 @@ def get_time_sig_list():
 
 
 # Return a list of all tune type values to populate the advanced search drop-down.
-# FIXME: "?annotation jams:isJAMSAnnotationOf ?tune." line added as ad-hoc
-# temporary fix to hide tunes from The Session that don't have pattern data.
 def get_tune_type_list():
     sparql_query =   """PREFIX mm:<http://w3id.org/polifonia/ontology/music-meta/>
                         PREFIX core:<http://w3id.org/polifonia/ontology/core/>
@@ -393,7 +388,6 @@ def get_tune_type_list():
                         WHERE
                         {
                             ?tune rdf:type mm:MusicEntity.
-                            ?annotation jams:isJAMSAnnotationOf ?tune.
                             ?tune mm:hasFormType ?tuneTypeURI.
                             ?tuneTypeURI core:name ?tuneType.
                         } ORDER BY ?tuneType"""
